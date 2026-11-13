@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>نظام إدارة المصانع والخطوط والمخزون والخامات</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand-group">
+        <div class="brand-badge" aria-hidden="true">WMS</div>
+        <div>
+          <h1 class="brand-title">نظام إدارة المصانع وخطوط الإنتاج والمخزون</h1>
+          <p class="brand-subtitle">عزل صارم لكل مصنع • خطط الإنتاج • تعيينات مرنة • فلترة ذكية</p>
+        </div>
+      </div>
+
+      <div class="plant-control-bar">
+        <label for="activePlantSelect" class="plant-select-label">المصنع النشط:</label>
+        <select id="activePlantSelect" class="plant-select" aria-label="اختيار المصنع النشط">
+          <option value="">-- اختر المصنع --</option>
+        </select>
+        <button type="button" id="headerAddPlantBtn" class="btn btn-header-accent btn-sm">
+          + مصنع جديد
+        </button>
+      </div>
+    </div>
+
+    <nav class="header-nav" aria-label="التنقل الرئيسي">
+      <div class="header-nav-inner">
+        <div class="nav-tabs-group">
+          <button type="button" class="nav-tab active" data-view="filter" id="navFilterBtn">
+            الفلترة الذكية
+          </button>
+          <button type="button" class="nav-tab" data-view="lines" id="navLinesBtn">
+            إدارة الخطوط <span class="nav-count" id="navLinesCount">0</span>
+          </button>
+          <button type="button" class="nav-tab" data-view="materials" id="navMaterialsBtn">
+            إدارة الخامات <span class="nav-count" id="navMaterialsCount">0</span>
+          </button>
+          <button type="button" class="nav-tab" data-view="stock" id="navStockBtn">
+            المخزون <span class="nav-count" id="navStockAlertCount">0</span>
+          </button>
+          <button type="button" class="nav-tab" data-view="plants" id="navPlantsBtn">
+            المصانع <span class="nav-count" id="navPlantsCount">0</span>
+          </button>
+        </div>
+        <button type="button" id="headerSupplyBtn" class="btn btn-header-supply btn-sm">
+          + توريد كمية للخط
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- Empty / No Active Plant Gate -->
+    <section id="noPlantGate" class="card hidden">
+      <div class="empty-state">
+        <div class="empty-icon">🏭</div>
+        <h2 class="empty-title" id="noPlantTitle">اختر مصنعاً للبدء</h2>
+        <p class="empty-desc" id="noPlantDesc">
+          كل مصنع يعمل في نطاق معزول تماماً بخطوطه وخاماته ومخزونه وخططه الخاصة. اختر مصنعاً من القائمة العلوية أو أنشئ مصنعاً جديداً.
+        </p>
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+          <button type="button" id="gateCreatePlantBtn" class="btn btn-primary">+ إنشاء مصنع جديد</button>
+          <button type="button" id="gateLoadDemoBtn" class="btn btn-secondary">تحميل بيانات تجريبية (Plant 7 &amp; Plant 2)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 1: SMART FILTERING -->
+    <section id="view-filter" class="view-section">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">الفلترة الذكية للخامات حسب خطوط الإنتاج</h2>
+            <p class="card-subtitle">حدد خطاً أو أكثر واختر نوع الفلترة لعرض الخامات الحصرية أو المشتركة مع حالة الخطة والمورّد.</p>
+          </div>
+          <span class="plant-scope-pill" id="filterPlantPill">--</span>
+        </div>
+
+        <div class="form-grid">
+          <div class="field-group">
+            <div class="field-label-row">
+              <label class="field-label">خطوط الإنتاج (اختيار متعدد)</label>
+              <button type="button" class="btn-link" data-jump-view="lines">إدارة الخطوط ↗</button>
+            </div>
+            <div class="multi-select-box" id="filterLinesBox">
+              <button type="button" class="multi-select-trigger" id="filterLinesTrigger" aria-expanded="false">
+                <span id="filterLinesTriggerText">اختر خطوط الإنتاج...</span>
+                <span>▾</span>
+              </button>
+              <div class="multi-select-dropdown hidden" id="filterLinesDropdown">
+                <div class="dropdown-search-row">
+                  <input
+                    type="text"
+                    id="filterLineSearchInput"
+                    class="input-control"
+                    placeholder="ابحث عن خط إنتاج..."
+                    autocomplete="off"
+                  />
+                  <button type="button" id="filterSelectAllLinesBtn" class="btn btn-secondary btn-sm">تحديد الكل</button>
+                  <button type="button" id="filterClearLinesBtn" class="btn btn-secondary btn-sm">مسح</button>
+                </div>
+                <div class="dropdown-options-list" id="filterLinesOptionsList"></div>
+                <div style="margin-top:8px; padding-top:8px; border-top:1px solid var(--border-light); display:flex; justify-content:space-between; align-items:center;">
+                  <button type="button" class="btn-link" data-jump-view="lines">+ إضافة أو تعديل الخطوط</button>
+                  <button type="button" class="btn btn-primary btn-sm" id="filterDropdownDoneBtn">تم</button>
+                </div>
+              </div>
+            </div>
+            <div class="selected-chips-row" id="filterSelectedChips"></div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">نوع الفلترة</label>
+            <div class="mode-group" role="radiogroup" aria-label="نوع الفلترة">
+              <label class="mode-option">
+                <input type="radio" name="filterMode" value="exclusive" />
+                <span class="mode-card" data-mode="exclusive">
+                  <span class="mode-title" style="color:var(--exclusive);">حصري (Exclusive)</span>
+                  <span class="mode-desc">يعمل في الخطوط المحددة فقط</span>
+                </span>
+              </label>
+              <label class="mode-option">
+                <input type="radio" name="filterMode" value="shared" />
+                <span class="mode-card" data-mode="shared">
+                  <span class="mode-title" style="color:var(--shared);">مشترك (Shared)</span>
+                  <span class="mode-desc">المحددة + خط آخر على الأقل</span>
+                </span>
+              </label>
+              <label class="mode-option">
+                <input type="radio" name="filterMode" value="both" checked />
+                <span class="mode-card" data-mode="both">
+                  <span class="mode-title" style="color:var(--primary);">كلاهما (Both)</span>
+                  <span class="mode-desc">الحصري والمشترك مع التوضيح</span>
+                </span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-actions-row">
+          <button type="button" id="applyFilterBtn" class="btn btn-primary">تطبيق الفلتر</button>
+          <button type="button" id="resetFilterBtn" class="btn btn-secondary">إعادة ضبط</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="results-summary-bar hidden" id="filterSummaryBar">
+          <div class="results-counter-text" id="filterCounterText">0 خامة — 0 حصري، 0 مشترك</div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <span class="badge badge-exclusive" id="filterExclusivePill">حصري: 0</span>
+            <span class="badge badge-shared" id="filterSharedPill">مشترك: 0</span>
+          </div>
+        </div>
+
+        <div id="filterInitialEmptyState" class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <h3 class="empty-title">جاهز للفلترة</h3>
+          <p class="empty-desc">اختر خطاً واحداً أو أكثر من القائمة أعلاه ثم اضغط «تطبيق الفلتر» لعرض النتائج. (الخامات غير المرتبطة بأي خط لا تظهر هنا)</p>
+        </div>
+
+        <div id="filterNoResultsState" class="empty-state hidden">
+          <div class="empty-icon">📭</div>
+          <h3 class="empty-title">لا توجد خامات مطابقة</h3>
+          <p class="empty-desc">لا توجد خامات تطابق الخطوط ونوع الفلترة المحددين داخل هذا المصنع.</p>
+          <button type="button" id="emptyResetFilterBtn" class="btn btn-secondary">إعادة ضبط الفلتر</button>
+        </div>
+
+        <div class="table-wrap hidden" id="filterTableWrap">
+          <table>
+            <thead>
+              <tr>
+                <th>
+                  <button type="button" class="sort-btn" data-sort-key="code">
+                    كود الخامة <span class="sort-indicator" data-indicator="code">⇅</span>
+                  </button>
+                </th>
+                <th>
+                  <button type="button" class="sort-btn" data-sort-key="name">
+                    الاسم <span class="sort-indicator" data-indicator="name">⇅</span>
+                  </button>
+                </th>
+                <th>الخطوط</th>
+                <th>
+                  <button type="button" class="sort-btn" data-sort-key="lineCount">
+                    عدد الخطوط <span class="sort-indicator" data-indicator="lineCount">⇅</span>
+                  </button>
+                </th>
+                <th>النوع</th>
+                <th>
+                  <button type="button" class="sort-btn" data-sort-key="supplied">
+                    المورّد / الخطة <span class="sort-indicator" data-indicator="supplied">⇅</span>
+                  </button>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="filterResultsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: LINE MANAGEMENT (FULL CRUD + PLAN TRACKING + REORDERING) -->
+    <section id="view-lines" class="view-section hidden">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">إدارة خطوط الإنتاج وخطط التشغيل</h2>
+            <p class="card-subtitle">إضافة وتعديل وحذف وترتيب الخطوط مع متابعة كمية الخطة والمورّد للمصنع النشط فقط.</p>
+          </div>
+          <span class="plant-scope-pill" id="linesPlantPill">--</span>
+        </div>
+
+        <div class="toolbar-row">
+          <div class="search-box-wrap">
+            <input
+              type="text"
+              id="lineListSearchInput"
+              class="input-control"
+              placeholder="ابحث في خطوط هذا المصنع..."
+              autocomplete="off"
+            />
+          </div>
+          <button type="button" id="addLineBtn" class="btn btn-primary">+ إضافة خط إنتاج</button>
+        </div>
+
+        <div id="linesBulkBar" class="bulk-bar hidden">
+          <div style="font-weight:700; color:var(--primary);" id="linesBulkCountText">تم تحديد 0 خط</div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button type="button" id="bulkPrefixLinesBtn" class="btn btn-secondary btn-sm">إضافة بادئة للأسماء</button>
+            <button type="button" id="bulkDeleteLinesBtn" class="btn btn-danger-outline btn-sm">حذف المحدد</button>
+            <button type="button" id="bulkClearLinesSelectionBtn" class="btn btn-secondary btn-sm">إلغاء التحديد</button>
+          </div>
+        </div>
+
+        <div id="linesEmptyState" class="empty-state hidden">
+          <div class="empty-icon">⚙️</div>
+          <h3 class="empty-title" id="linesEmptyTitle">لا توجد خطوط إنتاج في هذا المصنع</h3>
+          <p class="empty-desc" id="linesEmptyDesc">أضف خطوط الإنتاج وحدد كمية الخطة لكل خط.</p>
+          <button type="button" id="linesEmptyAddBtn" class="btn btn-primary">+ إضافة خط إنتاج</button>
+        </div>
+
+        <div class="table-wrap hidden" id="linesTableWrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:44px;">
+                  <input type="checkbox" id="linesSelectAllCheckbox" aria-label="تحديد كل الخطوط" />
+                </th>
+                <th style="width:120px;">الترتيب</th>
+                <th>اسم الخط</th>
+                <th style="width:230px;">الخطة والمورّد</th>
+                <th style="width:120px;">الخامات المرتبطة</th>
+                <th style="width:240px;">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="linesTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: MATERIALS MANAGEMENT (ALL MATERIALS + ASSIGNMENTS + STOCK) -->
+    <section id="view-materials" class="view-section hidden">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">إدارة الخامات وتعيينات الخطوط</h2>
+            <p class="card-subtitle">عرض جميع الخامات (بما فيها غير المرتبطة بأي خط) وتعديل التعيينات والمخزون في المصنع النشط فقط.</p>
+          </div>
+          <span class="plant-scope-pill" id="materialsPlantPill">--</span>
+        </div>
+
+        <div class="toolbar-row">
+          <div class="search-box-wrap">
+            <input
+              type="text"
+              id="materialListSearchInput"
+              class="input-control"
+              placeholder="ابحث بكود الخامة أو الاسم أو الوصف..."
+              autocomplete="off"
+            />
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button type="button" class="btn btn-secondary" data-jump-view="lines">إدارة الخطوط ↗</button>
+            <button type="button" id="materialsSupplyBtn" class="btn btn-success">+ توريد كمية</button>
+            <button type="button" id="addMaterialBtn" class="btn btn-primary">+ إضافة خامة جديدة</button>
+          </div>
+        </div>
+
+        <div id="materialsEmptyState" class="empty-state hidden">
+          <div class="empty-icon">📦</div>
+          <h3 class="empty-title" id="materialsEmptyTitle">لا توجد خامات في هذا المصنع</h3>
+          <p class="empty-desc" id="materialsEmptyDesc">أضف الخامات وحدد رصيد المخزون وخطوط الإنتاج الخاصة بها.</p>
+          <button type="button" id="materialsEmptyAddBtn" class="btn btn-primary">+ إضافة خامة جديدة</button>
+        </div>
+
+        <div class="table-wrap hidden" id="materialsTableWrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:110px;">كود الخامة</th>
+                <th>الاسم والوصف</th>
+                <th style="width:140px;">رصيد المخزون</th>
+                <th>خطوط الإنتاج المرتبطة</th>
+                <th style="width:100px;">عدد الخطوط</th>
+                <th style="width:270px;">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="materialsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: STOCK / WAREHOUSE (PER PLANT) -->
+    <section id="view-stock" class="view-section hidden">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">مخزون المستودع (Warehouse Stock)</h2>
+            <p class="card-subtitle">متابعة الكميات المتوفرة، تنبيهات انخفاض المخزون (&lt; 10%)، وإضافة أرصدة جديدة للمصنع النشط.</p>
+          </div>
+          <span class="plant-scope-pill" id="stockPlantPill">--</span>
+        </div>
+
+        <div class="kpi-grid" id="stockKpiGrid">
+          <div class="kpi-card">
+            <span class="kpi-label">إجمالي الخامات</span>
+            <span class="kpi-value mono" id="stockKpiCount">0</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">إجمالي المخزون المتاح</span>
+            <span class="kpi-value mono" id="stockKpiTotal">0</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">تنبيهات المخزون المنخفض (&lt; 10%)</span>
+            <span class="kpi-value mono" id="stockKpiLow" style="color:var(--danger);">0</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">إجمالي المورّد / الخطة للخطوط</span>
+            <span class="kpi-value mono" id="stockKpiPlan">0 / 0</span>
+          </div>
+        </div>
+
+        <div class="toolbar-row">
+          <div class="search-box-wrap">
+            <input
+              type="text"
+              id="stockSearchInput"
+              class="input-control"
+              placeholder="ابحث في مخزون المصنع..."
+              autocomplete="off"
+            />
+          </div>
+          <button type="button" id="stockSupplyBtn" class="btn btn-success">+ توريد من المخزون لخط</button>
+        </div>
+
+        <div id="stockEmptyState" class="empty-state hidden">
+          <div class="empty-icon">🏬</div>
+          <h3 class="empty-title">لا يوجد مخزون مسجل في هذا المصنع</h3>
+          <p class="empty-desc">أضف خامات مع أرصدة مخزون لعرضها وإدارتها هنا.</p>
+          <button type="button" class="btn btn-primary" data-jump-view="materials">الانتقال إلى إدارة الخامات</button>
+        </div>
+
+        <div class="table-wrap hidden" id="stockTableWrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:110px;">الكود</th>
+                <th>الخامة</th>
+                <th style="width:130px;">المخزون المتاح</th>
+                <th style="width:130px;">الرصيد الابتدائي</th>
+                <th style="width:160px;">حالة المخزون</th>
+                <th style="width:230px;">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="stockTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 5: PLANTS MANAGEMENT -->
+    <section id="view-plants" class="view-section hidden">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">إدارة المصانع (النطاقات المعزولة)</h2>
+            <p class="card-subtitle">كل مصنع يمتلك قاعدة بيانات منفصلة لخطوطه وخططه وخاماته ومخزونه.</p>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button type="button" id="plantsLoadDemoBtn" class="btn btn-secondary btn-sm">تحميل سيناريو تجريبي</button>
+            <button type="button" id="plantsAddBtn" class="btn btn-primary">+ مصنع جديد</button>
+          </div>
+        </div>
+
+        <div id="plantsEmptyState" class="empty-state hidden">
+          <div class="empty-icon">🏭</div>
+          <h3 class="empty-title">لا توجد مصانع مسجلة بعد</h3>
+          <p class="empty-desc">أنشئ أول مصنع (مثلاً Plant 7 أو Plant 2) أو حمّل السيناريو التجريبي للاختبار السريع.</p>
+          <button type="button" id="plantsEmptyAddBtn" class="btn btn-primary">+ إنشاء أول مصنع</button>
+        </div>
+
+        <div class="table-wrap hidden" id="plantsTableWrap">
+          <table>
+            <thead>
+              <tr>
+                <th>اسم المصنع</th>
+                <th style="width:100px;">الخطوط</th>
+                <th style="width:100px;">الخامات</th>
+                <th style="width:120px;">إجمالي المخزون</th>
+                <th style="width:120px;">الحالة</th>
+                <th style="width:230px;">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="plantsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL: ADD / RENAME PLANT -->
+  <div id="plantModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="plantModalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="plantModalTitle">إضافة مصنع</h3>
+        <button type="button" class="modal-close-btn" data-close-modal="plantModal" aria-label="إغلاق">✕</button>
+      </div>
+      <form id="plantForm" novalidate>
+        <input type="hidden" id="plantEditId" />
+        <div class="field-group">
+          <label for="plantNameInput" class="field-label">اسم المصنع <span class="required-star">*</span></label>
+          <input
+            type="text"
+            id="plantNameInput"
+            class="input-control"
+            placeholder="مثال: Plant 7"
+            autocomplete="off"
+          />
+          <span class="field-error hidden" id="plantNameError"></span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="plantModal">إلغاء</button>
+          <button type="submit" class="btn btn-primary">حفظ المصنع</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT LINE (WITH STRICT EMPTY NUMERIC PLAN_QTY) -->
+  <div id="lineModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="lineModalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="lineModalTitle">إضافة خط إنتاج</h3>
+        <button type="button" class="modal-close-btn" data-close-modal="lineModal" aria-label="إغلاق">✕</button>
+      </div>
+      <form id="lineForm" novalidate>
+        <input type="hidden" id="lineEditId" />
+        <div class="field-group" style="margin-bottom:14px;">
+          <label for="lineNameInput" class="field-label">اسم خط الإنتاج <span class="required-star">*</span></label>
+          <input
+            type="text"
+            id="lineNameInput"
+            class="input-control"
+            placeholder="مثال: Volvo Lift"
+            autocomplete="off"
+          />
+          <small class="field-hint">يجب أن يكون اسم الخط فريداً داخل المصنع الحالي فقط.</small>
+          <span class="field-error hidden" id="lineNameError"></span>
+        </div>
+
+        <div class="field-group">
+          <label for="linePlanQtyInput" class="field-label">كمية الخطة المستهدفة (plan_qty) <span class="required-star">*</span></label>
+          <div class="numeric-wrapper">
+            <!-- CRITICAL: NO value attribute! Opens completely empty with grey placeholder only -->
+            <input
+              type="text"
+              inputmode="numeric"
+              id="linePlanQtyInput"
+              class="input-control"
+              placeholder="مثال: 500"
+              autocomplete="off"
+            />
+            <button type="button" id="linePlanQtyClearBtn" class="clear-input-btn hidden" title="مسح الخطة" aria-label="مسح الخطة">✕</button>
+          </div>
+          <small class="field-hint">أدخل عدداً صحيحاً موجباً (≥ 1) بدون أرقام افتراضية.</small>
+          <span class="field-error hidden" id="linePlanQtyError"></span>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="lineModal">إلغاء</button>
+          <button type="submit" class="btn btn-primary">حفظ الخط</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT MATERIAL (STRICT EMPTY NUMERIC CODE & STOCK) -->
+  <div id="materialModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="materialModalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="materialModalTitle">إضافة خامة جديدة</h3>
+        <button type="button" class="modal-close-btn" data-close-modal="materialModal" aria-label="إغلاق">✕</button>
+      </div>
+      <form id="materialForm" novalidate>
+        <input type="hidden" id="materialEditId" />
+
+        <div class="form-grid" style="margin-bottom:14px;">
+          <div class="field-group">
+            <label for="materialCodeInput" class="field-label">كود الخامة (رقمي) <span class="required-star">*</span></label>
+            <div class="numeric-wrapper">
+              <!-- CRITICAL: No value attribute! Opens completely empty with grey placeholder only -->
+              <input
+                type="text"
+                inputmode="numeric"
+                id="materialCodeInput"
+                class="input-control"
+                placeholder="مثال: 100"
+                autocomplete="off"
+              />
+              <button type="button" id="materialCodeClearBtn" class="clear-input-btn hidden" title="مسح الكود" aria-label="مسح الكود">✕</button>
+            </div>
+            <small class="field-hint">أرقام فقط — يفتح فارغاً تماماً.</small>
+            <span class="field-error hidden" id="materialCodeError"></span>
+          </div>
+
+          <div class="field-group">
+            <label for="materialStockInput" class="field-label">رصيد المخزون (stock_qty) <span class="required-star">*</span></label>
+            <div class="numeric-wrapper">
+              <!-- CRITICAL: No value attribute! Opens completely empty with grey placeholder only -->
+              <input
+                type="text"
+                inputmode="numeric"
+                id="materialStockInput"
+                class="input-control"
+                placeholder="مثال: 2000"
+                autocomplete="off"
+              />
+              <button type="button" id="materialStockClearBtn" class="clear-input-btn hidden" title="مسح المخزون" aria-label="مسح المخزون">✕</button>
+            </div>
+            <small class="field-hint">كمية المستودع المتاحة لهذه الخامة.</small>
+            <span class="field-error hidden" id="materialStockError"></span>
+          </div>
+        </div>
+
+        <div class="field-group" style="margin-bottom:14px;">
+          <label for="materialNameInput" class="field-label">اسم الخامة <span class="required-star">*</span></label>
+          <input
+            type="text"
+            id="materialNameInput"
+            class="input-control"
+            placeholder="مثال: حامل محرك أمامي"
+            autocomplete="off"
+          />
+          <span class="field-error hidden" id="materialNameError"></span>
+        </div>
+
+        <div class="field-group" style="margin-bottom:14px;">
+          <label for="materialDescInput" class="field-label">الوصف (اختياري)</label>
+          <input
+            type="text"
+            id="materialDescInput"
+            class="input-control"
+            placeholder="ملاحظات أو مواصفات فنية"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="field-group">
+          <div class="field-label-row">
+            <label class="field-label">تعيين خطوط الإنتاج (اختياري — المصنع الحالي فقط)</label>
+            <button type="button" class="btn-link" id="modalManageLinesLink">إدارة الخطوط ↗</button>
+          </div>
+          <div class="multi-select-inline">
+            <div class="dropdown-search-row">
+              <input
+                type="text"
+                id="materialLineSearchInput"
+                class="input-control"
+                placeholder="ابحث داخل خطوط المصنع..."
+                autocomplete="off"
+              />
+            </div>
+            <div class="dropdown-options-list" id="materialLinesChecklist"></div>
+          </div>
+          <small class="field-hint">يمكن حفظ الخامة بدون خطوط، أو تعديل خطوطها لاحقاً في أي وقت.</small>
+          <span class="field-error hidden" id="materialLinesError"></span>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="materialModal">إلغاء</button>
+          <button type="submit" class="btn btn-primary">حفظ الخامة</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: MATERIAL DETAILS & FULL ASSIGNMENT EDITOR (CRITICAL SECTION 4) -->
+  <div id="materialDetailsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="materialDetailsTitle">
+    <div class="modal-card modal-card-lg">
+      <div class="modal-header">
+        <h3 class="modal-title" id="materialDetailsTitle">تفاصيل الخامة وتعيينات الخطوط</h3>
+        <button type="button" class="modal-close-btn" data-close-modal="materialDetailsModal" aria-label="إغلاق">✕</button>
+      </div>
+
+      <div class="live-info-box" style="margin-bottom:16px;">
+        <div class="live-info-row">
+          <div>
+            <span class="badge badge-neutral mono" id="detailsMatCodeBadge">100</span>
+            <strong id="detailsMatName" style="font-size:16px; margin-right:6px;">--</strong>
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button type="button" id="detailsSupplyBtn" class="btn btn-success btn-sm">+ توريد للخط</button>
+            <button type="button" id="detailsRestockBtn" class="btn btn-secondary btn-sm">+ إضافة مخزون</button>
+            <button type="button" id="detailsEditMatBtn" class="btn btn-secondary btn-sm">تعديل البيانات</button>
+          </div>
+        </div>
+        <div class="live-info-row">
+          <span id="detailsMatDesc" style="color:var(--text-muted); font-size:13px;">--</span>
+          <span id="detailsMatStockBadge" class="badge badge-neutral mono">المخزون: 0</span>
+        </div>
+      </div>
+
+      <!-- Current Assigned Lines List -->
+      <div class="field-group" style="margin-bottom:16px;">
+        <div class="field-label-row">
+          <label class="field-label">الخطوط المرتبطة حالياً بهذه الخامة (<span id="detailsAssignedCount">0</span>)</label>
+          <button type="button" id="detailsRemoveAllLinesBtn" class="btn btn-danger-outline btn-sm hidden">
+            إزالة جميع الخطوط
+          </button>
+        </div>
+
+        <div id="detailsZeroLinesBox" class="empty-state hidden" style="padding:18px;">
+          <span class="badge badge-empty" style="margin-bottom:6px;">غير مرتبط بأي لاين (No lines)</span>
+          <p class="empty-desc" style="margin:6px 0 0;">
+            الخامة محفوظة في المصنع ومتاحة في قائمة «إدارة الخامات» ويمكن إعادة ربطها بأي خط في أي وقت.
+          </p>
+        </div>
+
+        <div id="detailsAssignedLinesList" class="assigned-lines-list"></div>
+      </div>
+
+      <!-- Add More Lines to Material (Current Plant Only) -->
+      <div class="field-group">
+        <div class="field-label-row">
+          <label class="field-label">إضافة خطوط جديدة لهذه الخامة (المصنع الحالي فقط)</label>
+          <button type="button" class="btn-link" id="detailsManageLinesLink">إدارة الخطوط ↗</button>
+        </div>
+        <div class="multi-select-inline">
+          <div class="dropdown-search-row">
+            <input
+              type="text"
+              id="detailsAddLineSearchInput"
+              class="input-control"
+              placeholder="ابحث عن خط لإضافته..."
+              autocomplete="off"
+            />
+            <button type="button" id="detailsAddSelectedLinesBtn" class="btn btn-primary btn-sm">
+              + ربط الخطوط المحددة
+            </button>
+          </div>
+          <div class="dropdown-options-list" id="detailsAddLinesChecklist"></div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-modal="materialDetailsModal">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SUPPLY QUANTITY TO LINE (STRICT EMPTY INPUT + PLAN & STOCK VALIDATION) -->
+  <div id="supplyModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="supplyModalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="supplyModalTitle">توريد كمية إلى خط إنتاج</h3>
+        <button type="button" class="modal-close-btn" data-close-modal="supplyModal" aria-label="إغلاق">✕</button>
+      </div>
+      <form id="supplyForm" novalidate>
+        <div class="field-group" style="margin-bottom:14px;">
+          <label for="supplyMaterialSelect" class="field-label">اختر الخامة <span class="required-star">*</span></label>
+          <select id="supplyMaterialSelect" class="input-control"></select>
+        </div>
+
+        <div class="field-group" style="margin-bottom:14px;">
+          <label for="supplyLineSelect" class="field-label">اختر خط الإنتاج (مرتبة حسب الترتيب) <span class="required-star">*</span></label>
+          <select id="supplyLineSelect" class="input-control"></select>
+        </div>
+
+        <!-- Live Plan, Remaining & Stock Preview -->
+        <div id="supplyLivePreview" class="live-info-box" style="margin-bottom:14px;">
+          <div class="live-info-row">
+            <span>حالة خط الإنتاج:</span>
+            <span id="supplyLineStatusBadge" class="badge badge-empty">--</span>
+          </div>
+          <div class="progress-track">
+            <div id="supplyLineProgressFill" class="progress-fill empty" style="width:0%;"></div>
+          </div>
+          <div class="live-info-row">
+            <span>الخطة: <strong class="mono" id="supplyPlanVal">0</strong> | المورّد: <strong class="mono" id="supplyReceivedVal">0</strong></span>
+            <span>المتبقي في الخطة: <strong class="mono" id="supplyRemainingVal" style="color:var(--primary);">0</strong></span>
+          </div>
+          <div class="live-info-row">
+            <span>المخزون المتاح من الخامة:</span>
+            <strong class="mono" id="supplyStockVal">0</strong>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="supplyQtyInput" class="field-label">الكمية المراد توريدها <span class="required-star">*</span></label>
+          <div class="numeric-wrapper">
+            <!-- CRITICAL: NO value attribute! Always opens completely empty -->
+            <input
+              type="text"
+              inputmode="numeric"
+              id="supplyQtyInput"
+              class="input-control"
+              placeholder="مثال: 400"
+              autocomplete="off"
+            />
+            <button type="button" id="supplyQtyClearBtn" class="clear-input-btn hidden" title="مسح الكمية" aria-label="مسح الكمية">✕</button>
+          </div>
+          <small class="field-hint">أدخل عدداً صحيحاً ≥ 1. يفتح الحقل فارغاً دائماً بدون أرقام مسبقة.</small>
+          <span class="field-error hidden" id="supplyQtyError"></span>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="supplyModal">إلغاء</button>
+          <button type="submit" id="supplySubmitBtn" class="btn btn-success">تأكيد التوريد</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: RESTOCK MATERIAL (STRICT EMPTY NUMERIC INPUT) -->
+  <div id="restockModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="restockModalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="restockModalTitle">إضافة رصيد مخزون</h3>
+        <button type="button" class="modal-close-btn" data-close-modal="restockModal" aria-label="إغلاق">✕</button>
+      </div>
+      <form id="restockForm" novalidate>
+        <input type="hidden" id="restockMaterialId" />
+        <p id="restockMaterialLabel" style="margin:0 0 12px; font-weight:700;"></p>
+        <div class="field-group">
+          <label for="restockQtyInput" class="field-label">الكمية المضافة للمخزون <span class="required-star">*</span></label>
+          <div class="numeric-wrapper">
+            <!-- CRITICAL: NO value attribute! -->
+            <input
+              type="text"
+              inputmode="numeric"
+              id="restockQtyInput"
+              class="input-control"
+              placeholder="مثال: 1000"
+              autocomplete="off"
+            />
+            <button type="button" id="restockQtyClearBtn" class="clear-input-btn hidden" title="مسح الكمية" aria-label="مسح الكمية">✕</button>
+          </div>
+          <small class="field-hint">يقبل الأرقام الصحيحة ≥ 1 فقط.</small>
+          <span class="field-error hidden" id="restockQtyError"></span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="restockModal">إلغاء</button>
+          <button type="submit" class="btn btn-primary">إضافة للمخزون</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: BULK PREFIX LINES -->
+  <div id="bulkPrefixModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="bulkPrefixModalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="bulkPrefixModalTitle">إضافة بادئة لأسماء الخطوط المحددة</h3>
+        <button type="button" class="modal-close-btn" data-close-modal="bulkPrefixModal" aria-label="إغلاق">✕</button>
+      </div>
+      <form id="bulkPrefixForm" novalidate>
+        <div class="field-group">
+          <label for="bulkPrefixInput" class="field-label">البادئة <span class="required-star">*</span></label>
+          <input
+            type="text"
+            id="bulkPrefixInput"
+            class="input-control"
+            placeholder="مثال: P7-"
+            autocomplete="off"
+          />
+          <span class="field-error hidden" id="bulkPrefixError"></span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="bulkPrefixModal">إلغاء</button>
+          <button type="submit" class="btn btn-primary">تطبيق البادئة</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIRMATION DIALOG -->
+  <div id="confirmModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="confirmModalTitle">تأكيد الحذف</h3>
+        <button type="button" class="modal-close-btn" data-close-modal="confirmModal" aria-label="إغلاق">✕</button>
+      </div>
+      <p id="confirmModalMessage" style="margin:0; font-size:15px;"></p>
+      <div id="confirmModalWarning" class="warning-box hidden"></div>
+      <ul id="confirmModalList" style="margin:10px 0 0; padding-right:20px; font-size:13.5px;" class="hidden"></ul>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-modal="confirmModal">إلغاء</button>
+        <button type="button" id="confirmModalYesBtn" class="btn btn-danger">تأكيد الحذف</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <script src="core.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

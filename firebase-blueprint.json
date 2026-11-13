@@ -1,0 +1,320 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Authenticated warehouse user profile with RBAC role and assigned factory IDs.",
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "description": "Operator or supervisor display name."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Verified Google account email."
+        },
+        "role": {
+          "type": "string",
+          "enum": ["ADMIN", "SUPERVISOR", "OPERATOR", "VIEWER"],
+          "description": "RBAC access role."
+        },
+        "factoryIds": {
+          "type": "array",
+          "description": "List of plant/factory codes accessible to this user (e.g., P7, P8)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when user profile was created (clients must write FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when user profile was last updated (clients must write FieldValue.serverTimestamp())."
+        }
+      },
+      "required": ["displayName", "email", "role", "factoryIds", "createdAt", "updatedAt"]
+    },
+    "Factory": {
+      "title": "Factory",
+      "description": "Manufacturing plant configuration with production lines and warehouse storage zones.",
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Short uppercase factory code (e.g., P7)."
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable plant name."
+        },
+        "productionLines": {
+          "type": "array",
+          "description": "Active production lines in this plant (e.g., Volvo LFT, CDPO)."
+        },
+        "zones": {
+          "type": "array",
+          "description": "Warehouse bin zones/aisles in this plant."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last update."
+        }
+      },
+      "required": ["code", "name", "productionLines", "zones", "updatedAt"]
+    },
+    "Material": {
+      "title": "Material",
+      "description": "Inventory SKU scoped to a factory with an exact 8-digit partNumber and atomic stock quantity.",
+      "type": "object",
+      "properties": {
+        "factoryId": {
+          "type": "string",
+          "description": "Plant code owning this inventory record (e.g., P7)."
+        },
+        "partNumber": {
+          "type": "string",
+          "description": "Exact 8-digit numeric part number (^[0-9]{8}$)."
+        },
+        "name": {
+          "type": "string",
+          "description": "Material or component name."
+        },
+        "availableQty": {
+          "type": "integer",
+          "description": "Current available stock quantity (>= 0)."
+        },
+        "minThreshold": {
+          "type": "integer",
+          "description": "Low-stock alert threshold (>= 0)."
+        },
+        "requiredQty": {
+          "type": "integer",
+          "description": "Target/required production line stock quantity (>= 0)."
+        },
+        "location": {
+          "type": "string",
+          "description": "Current warehouse bin/rack location."
+        },
+        "productionLine": {
+          "type": "string",
+          "description": "Assigned production line (e.g., Volvo LFT, CDPO)."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["IN_STOCK", "LOW_STOCK", "OUT_OF_STOCK"],
+          "description": "Computed stock availability status."
+        },
+        "unit": {
+          "type": "string",
+          "description": "Unit of measure (e.g., PCS, KG, BOX)."
+        },
+        "updatedBy": {
+          "type": "string",
+          "description": "UID of the user who last modified this material."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when material was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when material was last updated."
+        }
+      },
+      "required": [
+        "factoryId",
+        "partNumber",
+        "name",
+        "availableQty",
+        "minThreshold",
+        "location",
+        "productionLine",
+        "status",
+        "unit",
+        "updatedBy",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "StockTransaction": {
+      "title": "StockTransaction",
+      "description": "Immutable atomic stock movement audit log entry.",
+      "type": "object",
+      "properties": {
+        "factoryId": {
+          "type": "string",
+          "description": "Plant code where transaction occurred."
+        },
+        "materialId": {
+          "type": "string",
+          "description": "Composite key ${factoryId}_${partNumber}."
+        },
+        "partNumber": {
+          "type": "string",
+          "description": "Exact 8-digit numeric part number."
+        },
+        "materialName": {
+          "type": "string",
+          "description": "Denormalized material name for audit display."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["RECEIVE", "ISSUE", "TRANSFER"],
+          "description": "Movement type."
+        },
+        "qty": {
+          "type": "integer",
+          "description": "Positive quantity moved (> 0)."
+        },
+        "previousQty": {
+          "type": "integer",
+          "description": "Stock quantity prior to transaction (>= 0)."
+        },
+        "newQty": {
+          "type": "integer",
+          "description": "Stock quantity after transaction (>= 0)."
+        },
+        "user": {
+          "type": "string",
+          "description": "Display name or email of the operator."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Authenticated Firebase UID of the operator."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of atomic commit."
+        },
+        "location": {
+          "type": "string",
+          "description": "Origin or active bin location."
+        },
+        "targetLocation": {
+          "type": "string",
+          "description": "Destination bin location for TRANSFER transactions."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional movement notes."
+        }
+      },
+      "required": [
+        "factoryId",
+        "materialId",
+        "partNumber",
+        "materialName",
+        "type",
+        "qty",
+        "previousQty",
+        "newQty",
+        "user",
+        "userId",
+        "timestamp",
+        "location"
+      ]
+    },
+    "CycleCountRecord": {
+      "title": "CycleCountRecord",
+      "description": "Immutable physical cycle count record comparing system vs physical stock.",
+      "type": "object",
+      "properties": {
+        "factoryId": { "type": "string" },
+        "materialId": { "type": "string" },
+        "partNumber": { "type": "string" },
+        "materialName": { "type": "string" },
+        "location": { "type": "string" },
+        "systemQty": { "type": "integer" },
+        "actualQty": { "type": "integer" },
+        "variance": { "type": "integer" },
+        "status": { "type": "string", "enum": ["MATCHED", "ADJUSTED"] },
+        "countedBy": { "type": "string" },
+        "countedByUid": { "type": "string" },
+        "notes": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "factoryId",
+        "materialId",
+        "partNumber",
+        "materialName",
+        "location",
+        "systemQty",
+        "actualQty",
+        "variance",
+        "status",
+        "countedBy",
+        "countedByUid",
+        "timestamp"
+      ]
+    },
+    "DiscrepancyRecord": {
+      "title": "DiscrepancyRecord",
+      "description": "Immutable discrepancy audit record created when cycle count variance != 0.",
+      "type": "object",
+      "properties": {
+        "factoryId": { "type": "string" },
+        "cycleCountId": { "type": "string" },
+        "materialId": { "type": "string" },
+        "partNumber": { "type": "string" },
+        "materialName": { "type": "string" },
+        "location": { "type": "string" },
+        "systemQty": { "type": "integer" },
+        "actualQty": { "type": "integer" },
+        "variance": { "type": "integer" },
+        "resolutionStatus": { "type": "string", "enum": ["ADJUSTED", "OPEN"] },
+        "reportedBy": { "type": "string" },
+        "reportedByUid": { "type": "string" },
+        "notes": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "factoryId",
+        "cycleCountId",
+        "materialId",
+        "partNumber",
+        "materialName",
+        "location",
+        "systemQty",
+        "actualQty",
+        "variance",
+        "resolutionStatus",
+        "reportedBy",
+        "reportedByUid",
+        "timestamp"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": { "$ref": "UserProfile" },
+      "description": "User RBAC profile documents keyed by Firebase Auth UID."
+    },
+    "/factories/{factoryId}": {
+      "schema": { "$ref": "Factory" },
+      "description": "Plant/factory configurations keyed by uppercase factory code."
+    },
+    "/materials/{factoryId_partNumber}": {
+      "schema": { "$ref": "Material" },
+      "description": "Plant-scoped material inventory documents keyed by ${factoryId}_${partNumber}."
+    },
+    "/transactions/{id}": {
+      "schema": { "$ref": "StockTransaction" },
+      "description": "Append-only immutable stock movement transaction logs."
+    },
+    "/cycleCounts/{id}": {
+      "schema": { "$ref": "CycleCountRecord" },
+      "description": "Immutable cycle count verification and adjustment logs."
+    },
+    "/discrepancies/{id}": {
+      "schema": { "$ref": "DiscrepancyRecord" },
+      "description": "Immutable inventory variance discrepancy records."
+    }
+  }
+}

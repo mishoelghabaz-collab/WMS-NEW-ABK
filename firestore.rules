@@ -1,0 +1,323 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global safety net: deny everything by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- GLOBAL HELPERS ---
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidFactoryCode(code) {
+      return code is string && code.size() >= 1 && code.size() <= 16 && code.matches('^[A-Z0-9\\-]+$');
+    }
+
+    function isValidPartNumber(pn) {
+      return pn is string && pn.matches('^[0-9]{8}$');
+    }
+
+    function isBootstrappedAdmin() {
+      return isSignedIn() &&
+             ('email_verified' in request.auth.token) &&
+             request.auth.token.email_verified == true &&
+             ('email' in request.auth.token) &&
+             request.auth.token.email == 'mishoelghabaz@gmail.com';
+    }
+
+    function userDocExists() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isAdmin() {
+      return isBootstrappedAdmin() ||
+             (isSignedIn() && userDocExists() && getUserData().role == 'ADMIN');
+    }
+
+    function hasFactoryAccess(factoryId) {
+      return isAdmin() ||
+             (isSignedIn() && userDocExists() && factoryId in getUserData().factoryIds);
+    }
+
+    function isSupervisorOrAdmin(factoryId) {
+      return isAdmin() ||
+             (isSignedIn() &&
+              userDocExists() &&
+              getUserData().role in ['ADMIN', 'SUPERVISOR'] &&
+              factoryId in getUserData().factoryIds);
+    }
+
+    function isOperatorOrAbove(factoryId) {
+      return isAdmin() ||
+             (isSignedIn() &&
+              userDocExists() &&
+              getUserData().role in ['ADMIN', 'SUPERVISOR', 'OPERATOR'] &&
+              factoryId in getUserData().factoryIds);
+    }
+
+    // --- ENTITY VALIDATION HELPERS ---
+    function isValidUserProfile(data) {
+      return data.displayName is string && data.displayName.size() <= 100 &&
+             data.email is string && data.email.size() <= 150 &&
+             data.role in ['ADMIN', 'SUPERVISOR', 'OPERATOR', 'VIEWER'] &&
+             data.factoryIds is list && data.factoryIds.size() <= 20 &&
+             (data.factoryIds.size() == 0 || data.factoryIds[0] is string) &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidFactory(data) {
+      return isValidFactoryCode(data.code) &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 80 &&
+             data.productionLines is list && data.productionLines.size() <= 30 &&
+             (data.productionLines.size() == 0 || data.productionLines[0] is string) &&
+             data.zones is list && data.zones.size() <= 50 &&
+             (data.zones.size() == 0 || data.zones[0] is string) &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidMaterial(data) {
+      return isValidFactoryCode(data.factoryId) &&
+             isValidPartNumber(data.partNumber) &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 120 &&
+             data.availableQty is int && data.availableQty >= 0 && data.availableQty <= 100000000 &&
+             data.minThreshold is int && data.minThreshold >= 0 && data.minThreshold <= 1000000 &&
+             (!('requiredQty' in data) || (data.requiredQty is int && data.requiredQty >= 0 && data.requiredQty <= 100000000)) &&
+             data.location is string && data.location.size() >= 1 && data.location.size() <= 40 &&
+             data.productionLine is string && data.productionLine.size() >= 1 && data.productionLine.size() <= 60 &&
+             data.status in ['IN_STOCK', 'LOW_STOCK', 'OUT_OF_STOCK'] &&
+             (
+               (data.availableQty == 0 && data.status == 'OUT_OF_STOCK') ||
+               (data.availableQty > 0 && data.availableQty <= data.minThreshold && data.status == 'LOW_STOCK') ||
+               (data.availableQty > data.minThreshold && data.status == 'IN_STOCK')
+             ) &&
+             data.unit is string && data.unit.size() >= 1 && data.unit.size() <= 16 &&
+             data.updatedBy is string && data.updatedBy.size() >= 1 && data.updatedBy.size() <= 128 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidTransaction(data) {
+      return isValidFactoryCode(data.factoryId) &&
+             isValidPartNumber(data.partNumber) &&
+             data.materialId is string &&
+             data.materialId == data.factoryId + '_' + data.partNumber &&
+             data.materialName is string && data.materialName.size() >= 1 && data.materialName.size() <= 120 &&
+             data.type in ['RECEIVE', 'ISSUE', 'TRANSFER'] &&
+             data.qty is int && data.qty > 0 && data.qty <= 100000000 &&
+             data.previousQty is int && data.previousQty >= 0 &&
+             data.newQty is int && data.newQty >= 0 &&
+             (
+               (data.type == 'RECEIVE' && data.newQty == data.previousQty + data.qty) ||
+               (data.type == 'ISSUE' && data.newQty == data.previousQty - data.qty) ||
+               (data.type == 'TRANSFER' && data.newQty == data.previousQty)
+             ) &&
+             data.user is string && data.user.size() >= 1 && data.user.size() <= 150 &&
+             data.userId is string && data.userId == request.auth.uid &&
+             data.timestamp is timestamp && data.timestamp <= request.time &&
+             data.location is string && data.location.size() >= 1 && data.location.size() <= 40 &&
+             (!('targetLocation' in data) || (data.targetLocation is string && data.targetLocation.size() <= 40)) &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() <= 300));
+    }
+
+    function isValidCycleCount(data) {
+      return isValidFactoryCode(data.factoryId) &&
+             isValidPartNumber(data.partNumber) &&
+             data.materialId is string &&
+             data.materialId == data.factoryId + '_' + data.partNumber &&
+             data.materialName is string && data.materialName.size() >= 1 && data.materialName.size() <= 120 &&
+             data.location is string && data.location.size() >= 1 && data.location.size() <= 40 &&
+             data.systemQty is int && data.systemQty >= 0 && data.systemQty <= 100000000 &&
+             data.actualQty is int && data.actualQty >= 0 && data.actualQty <= 100000000 &&
+             data.variance is int && data.variance == data.actualQty - data.systemQty &&
+             data.status in ['MATCHED', 'ADJUSTED'] &&
+             (
+               (data.variance == 0 && data.status == 'MATCHED') ||
+               (data.variance != 0 && data.status == 'ADJUSTED')
+             ) &&
+             data.countedBy is string && data.countedBy.size() >= 1 && data.countedBy.size() <= 150 &&
+             data.countedByUid is string && data.countedByUid == request.auth.uid &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() <= 300)) &&
+             data.timestamp is timestamp && data.timestamp <= request.time;
+    }
+
+    function isValidDiscrepancy(data) {
+      return isValidFactoryCode(data.factoryId) &&
+             isValidId(data.cycleCountId) &&
+             isValidPartNumber(data.partNumber) &&
+             data.materialId is string &&
+             data.materialId == data.factoryId + '_' + data.partNumber &&
+             data.materialName is string && data.materialName.size() >= 1 && data.materialName.size() <= 120 &&
+             data.location is string && data.location.size() >= 1 && data.location.size() <= 40 &&
+             data.systemQty is int && data.systemQty >= 0 && data.systemQty <= 100000000 &&
+             data.actualQty is int && data.actualQty >= 0 && data.actualQty <= 100000000 &&
+             data.variance is int && data.variance != 0 && data.variance == data.actualQty - data.systemQty &&
+             data.resolutionStatus in ['ADJUSTED', 'OPEN'] &&
+             data.reportedBy is string && data.reportedBy.size() >= 1 && data.reportedBy.size() <= 150 &&
+             data.reportedByUid is string && data.reportedByUid == request.auth.uid &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() <= 300)) &&
+             data.timestamp is timestamp && data.timestamp <= request.time;
+    }
+
+    // --- COLLECTION RULES ---
+
+    match /users/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && (request.auth.uid == userId || isAdmin());
+      allow list: if isSignedIn() && isAdmin();
+
+      allow create: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isValidUserProfile(incoming()) &&
+                       incoming().keys().hasAll(['displayName', 'email', 'role', 'factoryIds', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['displayName', 'email', 'role', 'factoryIds', 'createdAt', 'updatedAt']) &&
+                       (
+                         isAdmin() ||
+                         (
+                           request.auth.uid == userId &&
+                           (
+                             (isBootstrappedAdmin() && incoming().role == 'ADMIN') ||
+                             (incoming().role == 'VIEWER' && incoming().factoryIds.size() == 0)
+                           )
+                         )
+                       );
+
+      allow update: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isValidUserProfile(incoming()) &&
+                       incoming().createdAt == existing().createdAt &&
+                       (
+                         (
+                           isAdmin() &&
+                           incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'role', 'factoryIds', 'updatedAt'])
+                         ) ||
+                         (
+                           request.auth.uid == userId &&
+                           incoming().role == existing().role &&
+                           incoming().factoryIds == existing().factoryIds &&
+                           incoming().email == existing().email &&
+                           incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'updatedAt'])
+                         )
+                       );
+
+      allow delete: if isSignedIn() && isValidId(userId) && isAdmin() && request.auth.uid != userId;
+    }
+
+    match /factories/{factoryId} {
+      allow get: if isSignedIn() && isValidId(factoryId) && hasFactoryAccess(factoryId);
+      allow list: if isSignedIn() && (isAdmin() || (userDocExists() && resource.data.code in getUserData().factoryIds));
+
+      allow create, update: if isSignedIn() &&
+                               isValidId(factoryId) &&
+                               isValidFactory(incoming()) &&
+                               isAdmin() &&
+                               factoryId == incoming().code &&
+                               incoming().keys().hasAll(['code', 'name', 'productionLines', 'zones', 'updatedAt']) &&
+                               incoming().keys().hasOnly(['code', 'name', 'productionLines', 'zones', 'updatedAt']);
+
+      allow delete: if isSignedIn() && isValidId(factoryId) && isAdmin();
+    }
+
+    match /materials/{materialId} {
+      allow get: if isSignedIn() && isValidId(materialId) && hasFactoryAccess(existing().factoryId);
+      allow list: if isSignedIn() && (isAdmin() || (userDocExists() && resource.data.factoryId in getUserData().factoryIds));
+
+      allow create: if isSignedIn() &&
+                       isValidId(materialId) &&
+                       isValidMaterial(incoming()) &&
+                       materialId == incoming().factoryId + '_' + incoming().partNumber &&
+                       incoming().updatedBy == request.auth.uid &&
+                       isSupervisorOrAdmin(incoming().factoryId) &&
+                       incoming().keys().hasAll(['factoryId', 'partNumber', 'name', 'availableQty', 'minThreshold', 'location', 'productionLine', 'status', 'unit', 'updatedBy', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['factoryId', 'partNumber', 'name', 'availableQty', 'minThreshold', 'requiredQty', 'location', 'productionLine', 'status', 'unit', 'updatedBy', 'createdAt', 'updatedAt']);
+
+      allow update: if isSignedIn() &&
+                       isValidId(materialId) &&
+                       isValidMaterial(incoming()) &&
+                       incoming().factoryId == existing().factoryId &&
+                       incoming().partNumber == existing().partNumber &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().updatedBy == request.auth.uid &&
+                       (
+                         (
+                           isSupervisorOrAdmin(existing().factoryId) &&
+                           incoming().diff(existing()).affectedKeys().hasOnly(['name', 'availableQty', 'minThreshold', 'requiredQty', 'location', 'productionLine', 'status', 'unit', 'updatedBy', 'updatedAt'])
+                         ) ||
+                         (
+                           isOperatorOrAbove(existing().factoryId) &&
+                           incoming().diff(existing()).affectedKeys().hasOnly(['availableQty', 'requiredQty', 'location', 'productionLine', 'status', 'updatedBy', 'updatedAt'])
+                         )
+                       );
+
+      allow delete: if isSignedIn() && isValidId(materialId) && isSupervisorOrAdmin(existing().factoryId);
+    }
+
+    match /transactions/{txId} {
+      allow get: if isSignedIn() && isValidId(txId) && hasFactoryAccess(existing().factoryId);
+      allow list: if isSignedIn() && (isAdmin() || (userDocExists() && resource.data.factoryId in getUserData().factoryIds));
+
+      allow create: if isSignedIn() &&
+                       isValidId(txId) &&
+                       isValidTransaction(incoming()) &&
+                       isOperatorOrAbove(incoming().factoryId) &&
+                       incoming().keys().hasAll(['factoryId', 'materialId', 'partNumber', 'materialName', 'type', 'qty', 'previousQty', 'newQty', 'user', 'userId', 'timestamp', 'location']) &&
+                       incoming().keys().hasOnly(['factoryId', 'materialId', 'partNumber', 'materialName', 'type', 'qty', 'previousQty', 'newQty', 'user', 'userId', 'timestamp', 'location', 'targetLocation', 'notes']) &&
+                       existsAfter(/databases/$(database)/documents/materials/$(incoming().materialId)) &&
+                       getAfter(/databases/$(database)/documents/materials/$(incoming().materialId)).data.availableQty == incoming().newQty;
+
+      allow update, delete: if false;
+    }
+
+    match /cycleCounts/{countId} {
+      allow get: if isSignedIn() && isValidId(countId) && hasFactoryAccess(existing().factoryId);
+      allow list: if isSignedIn() && (isAdmin() || (userDocExists() && resource.data.factoryId in getUserData().factoryIds));
+
+      allow create: if isSignedIn() &&
+                       isValidId(countId) &&
+                       isValidCycleCount(incoming()) &&
+                       isOperatorOrAbove(incoming().factoryId) &&
+                       incoming().keys().hasAll(['factoryId', 'materialId', 'partNumber', 'materialName', 'location', 'systemQty', 'actualQty', 'variance', 'status', 'countedBy', 'countedByUid', 'timestamp']) &&
+                       incoming().keys().hasOnly(['factoryId', 'materialId', 'partNumber', 'materialName', 'location', 'systemQty', 'actualQty', 'variance', 'status', 'countedBy', 'countedByUid', 'notes', 'timestamp']) &&
+                       existsAfter(/databases/$(database)/documents/materials/$(incoming().materialId)) &&
+                       getAfter(/databases/$(database)/documents/materials/$(incoming().materialId)).data.availableQty == incoming().actualQty;
+
+      allow update, delete: if false;
+    }
+
+    match /discrepancies/{discrepancyId} {
+      allow get: if isSignedIn() && isValidId(discrepancyId) && hasFactoryAccess(existing().factoryId);
+      allow list: if isSignedIn() && (isAdmin() || (userDocExists() && resource.data.factoryId in getUserData().factoryIds));
+
+      allow create: if isSignedIn() &&
+                       isValidId(discrepancyId) &&
+                       isValidDiscrepancy(incoming()) &&
+                       isOperatorOrAbove(incoming().factoryId) &&
+                       incoming().keys().hasAll(['factoryId', 'cycleCountId', 'materialId', 'partNumber', 'materialName', 'location', 'systemQty', 'actualQty', 'variance', 'resolutionStatus', 'reportedBy', 'reportedByUid', 'timestamp']) &&
+                       incoming().keys().hasOnly(['factoryId', 'cycleCountId', 'materialId', 'partNumber', 'materialName', 'location', 'systemQty', 'actualQty', 'variance', 'resolutionStatus', 'reportedBy', 'reportedByUid', 'notes', 'timestamp']) &&
+                       existsAfter(/databases/$(database)/documents/cycleCounts/$(incoming().cycleCountId)) &&
+                       existsAfter(/databases/$(database)/documents/materials/$(incoming().materialId)) &&
+                       getAfter(/databases/$(database)/documents/materials/$(incoming().materialId)).data.availableQty == incoming().actualQty;
+
+      allow update, delete: if false;
+    }
+  }
+}

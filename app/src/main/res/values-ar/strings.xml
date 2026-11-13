@@ -1,0 +1,250 @@
+<resources>
+    <string name="app_name">PlantWMS</string>
+
+    <!-- Navigation -->
+    <string name="nav_dashboard">لوحة التحكم</string>
+    <string name="nav_inventory">المخزون</string>
+    <string name="nav_history">السجل</string>
+    <string name="nav_map">الخريطة</string>
+    <string name="nav_admin">الإدارة</string>
+
+    <!-- Top Bar & Language -->
+    <string name="cd_plant_selector">اختر المصنع</string>
+    <string name="cd_language_toggle">تبديل اللغة</string>
+    <string name="cd_barcode_scanner">فتح ماسح الباركود</string>
+    <string name="cd_sign_out">تسجيل الخروج</string>
+    <string name="lang_en">EN</string>
+    <string name="lang_ar">AR</string>
+    <string name="no_plant_assigned">لا يوجد مصنع</string>
+
+    <!-- Roles -->
+    <string name="role_admin">مدير النظام</string>
+    <string name="role_supervisor">مشرف</string>
+    <string name="role_operator">مشغل</string>
+    <string name="role_viewer">مراقب</string>
+
+    <!-- Material Statuses -->
+    <string name="status_in_stock">متوفر</string>
+    <string name="status_low_stock">مخزون منخفض</string>
+    <string name="status_out_of_stock">نفد المخزون</string>
+
+    <!-- Transaction Types -->
+    <string name="tx_receive">استلام</string>
+    <string name="tx_issue">صرف</string>
+    <string name="tx_transfer">نقل</string>
+
+    <!-- Auth -->
+    <string name="auth_sign_in_google">تسجيل الدخول عبر Google</string>
+    <string name="auth_sign_out">تسجيل الخروج</string>
+    <string name="auth_title">نظام إدارة المستودعات الصناعية</string>
+    <string name="auth_subtitle">سجل الدخول بحساب Google المعتمد للمصنع للوصول إلى عمليات المستودع الفورية.</string>
+    <string name="auth_badge">مزامنة فورية عبر FIRESTORE</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_factory_selector_label">المصنع النشط</string>
+    <string name="dashboard_add_factory">مصنع جديد</string>
+    <string name="dashboard_metrics_section">مؤشرات المصنع الفورية</string>
+    <string name="metric_total_stock">إجمالي المخزون</string>
+    <string name="metric_total_stock_sub">الوحدات المتاحة</string>
+    <string name="metric_skus">الأصناف</string>
+    <string name="metric_skus_sub">رموز المواد</string>
+    <string name="metric_critical_stock">مخزون حرج</string>
+    <string name="metric_critical_stock_sub">نفد من المخزون</string>
+    <string name="metric_warning">تحذير</string>
+    <string name="metric_warning_sub">أقل من الحد الأدنى</string>
+    <string name="dashboard_quick_actions">إجراءات سريعة</string>
+    <string name="action_scan">مسح</string>
+    <string name="action_receive">استلام</string>
+    <string name="action_issue">صرف</string>
+    <string name="action_transfer">نقل</string>
+    <string name="dashboard_recent_transactions">أحدث الحركات</string>
+    <string name="dashboard_no_plants_title">لا توجد مصانع مهيأة</string>
+    <string name="dashboard_no_plants_desc">أنشئ مصنعاً في Firestore أو اطلب من المدير منحك صلاحية الوصول.</string>
+    <string name="dashboard_no_transactions">لا توجد حركات مخزنية مسجلة لهذا المصنع حتى الآن.</string>
+    <string name="dashboard_viewer_readonly">حساب مراقب للقراءة فقط. تواصل مع المدير لتفعيل حركات المخزون.</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_create_plant_title">إنشاء مصنع جديد</string>
+    <string name="dialog_plant_code">رمز المصنع (مثال: P7)</string>
+    <string name="dialog_plant_name">اسم المصنع</string>
+    <string name="dialog_plant_lines">خطوط الإنتاج (مفصولة بفاصلة)</string>
+    <string name="dialog_plant_zones">مناطق المستودع (مفصولة بفاصلة)</string>
+    <string name="dialog_stock_tx_title">حركة مخزون ذرية</string>
+    <string name="dialog_add_material_title">تسجيل صنف مادة جديد</string>
+    <string name="dialog_part_number">رقم القطعة (8 أرقام)</string>
+    <string name="dialog_material_name">اسم المادة</string>
+    <string name="dialog_quantity">الكمية</string>
+    <string name="dialog_location">موقع الرف (مثال: A-01-02)</string>
+    <string name="dialog_target_location">موقع الوجهة</string>
+    <string name="dialog_production_line">خط الإنتاج (مثال: Volvo LFT)</string>
+    <string name="dialog_min_threshold">الحد الأدنى للتنبيه</string>
+    <string name="dialog_notes">ملاحظات (اختياري)</string>
+    <string name="dialog_confirm">تأكيد</string>
+    <string name="dialog_cancel">إلغاء</string>
+    <string name="dialog_new_sku_switch">تسجيل صنف جديد بدلاً من ذلك</string>
+    <string name="error_part_number_8_digits">يجب أن يتكون رقم القطعة من 8 أرقام بالضبط.</string>
+    <string name="error_positive_qty">يجب أن تكون الكمية أكبر من صفر.</string>
+
+    <!-- Material List (Inventory) -->
+    <string name="filter_all">الكل</string>
+    <string name="inventory_search_hint">ابحث برقم القطعة أو الاسم أو الموقع…</string>
+    <string name="inventory_btn_receive">+ استلام</string>
+    <string name="inventory_btn_issue">- صرف</string>
+    <string name="inventory_btn_transfer">نقل</string>
+    <string name="inventory_add_sku">إضافة صنف</string>
+    <string name="inventory_empty_title">لا توجد مواد مطابقة</string>
+    <string name="inventory_empty_desc">لا توجد أصناف في هذا المصنع أو الخط. عدل البحث أو سجل رقم قطعة جديد من 8 أرقام.</string>
+    <string name="inventory_current_qty">الكمية المتاحة حالياً</string>
+    <string name="inventory_current_loc">الموقع الحالي</string>
+    <string name="error_insufficient_stock">لا يمكن صرف %1$d: المتاح %2$d فقط.</string>
+    <string name="error_target_location_required">موقع الوجهة مطلوب لعملية النقل.</string>
+
+    <!-- Materials Search, Sort, Voice, Scanner & Bulk Actions -->
+    <string name="materials_search_label">ابحث برقم القطعة (8 أرقام) أو الاسم…</string>
+    <string name="cd_voice_search">البحث الصوتي برقم القطعة</string>
+    <string name="cd_sort_filter">فرز وتصفية</string>
+    <string name="cd_clear_search">مسح البحث</string>
+    <string name="recent_scans_title">أحدث عمليات المسح</string>
+    <string name="sort_sheet_title">ترتيب المواد</string>
+    <string name="sort_part_asc">رقم القطعة أ-ي</string>
+    <string name="sort_lowest_stock">الأقل مخزوناً أولاً</string>
+    <string name="sort_location_asc">الموقع (الممر / الرف)</string>
+    <string name="empty_search_message">لم يتم العثور على مادة لـ \"%1$s\". جرّب مسح الباركود أو إضافة صنف جديد.</string>
+    <string name="action_scan_barcode">مسح الباركود</string>
+    <string name="action_add_item">إضافة صنف</string>
+    <string name="select_mode_enable">تحديد</string>
+    <string name="select_mode_done">تم</string>
+    <string name="selected_count_label">تم تحديد %1$d</string>
+    <string name="bulk_transfer">نقل جماعي</string>
+    <string name="bulk_issue">صرف جماعي</string>
+    <string name="bulk_export_csv">تصدير CSV</string>
+    <string name="bulk_issue_qty_label">الكمية المصروفة لكل صنف محدد</string>
+    <string name="bulk_transfer_title">نقل جماعي (%1$d صنف)</string>
+    <string name="bulk_issue_title">صرف جماعي (%1$d صنف)</string>
+    <string name="voice_search_prompt">انطق رقم القطعة المكون من 8 أرقام أو اسم المادة</string>
+    <string name="voice_search_unavailable">التعرف على الصوت غير متاح على هذا الجهاز.</string>
+    <string name="scanner_dialog_title">مسح باركود القطعة</string>
+    <string name="scanner_camera_permission_rationale">إذن الكاميرا مطلوب لمسح باركود المواد المكون من 8 أرقام.</string>
+    <string name="scanner_grant_permission">منح إذن الكاميرا</string>
+    <string name="scanner_manual_hint">وجّه الكاميرا نحو الباركود أو رمز QR</string>
+    <string name="csv_export_subject">تصدير مخزون PlantWMS (%1$s)</string>
+
+    <!-- Scanner Screen -->
+    <string name="scanner_title">ماسح الباركود المستمر</string>
+    <string name="scanner_continuous_label">مسح مستمر</string>
+    <string name="scanner_paused_label">متوقف مؤقتاً</string>
+    <string name="scanner_manual_lookup">بحث يدوي (8 أرقام)</string>
+    <string name="scanner_lookup_button">بحث</string>
+    <string name="scanner_last_scanned">آخر مسح</string>
+    <string name="scanner_not_found_in_plant">الصنف %1$s غير مسجل في %2$s.</string>
+    <string name="scanner_count_now">جرد دوري</string>
+
+    <!-- Transaction History Screen -->
+    <string name="history_title">سجل الحركات</string>
+    <string name="history_search_hint">تصفية برقم القطعة أو اسم المادة…</string>
+    <string name="history_date_all">كل التواريخ</string>
+    <string name="history_date_today">اليوم</string>
+    <string name="history_date_7d">7 أيام</string>
+    <string name="history_date_30d">30 يوماً</string>
+    <string name="history_empty">لا توجد حركات مخزنية مطابقة للتصفية.</string>
+    <string name="history_operator_label">المشغل: %1$s</string>
+
+    <!-- Warehouse Map Screen -->
+    <string name="map_title">خريطة مناطق المستودع</string>
+    <string name="map_bins_count">%1$d رفوف</string>
+    <string name="map_skus_count">%1$d أصناف</string>
+    <string name="map_units_count">%1$d وحدة</string>
+    <string name="map_empty">لا توجد رفوف أو مواد مسجلة للمصنع %1$s بعد.</string>
+    <string name="map_zone_label">منطقة %1$s</string>
+
+    <!-- Admin & Operations Screen -->
+    <string name="admin_title">الإدارة والعمليات</string>
+    <string name="admin_operations_tools">عمليات المستودع</string>
+    <string name="admin_users_section">صلاحيات المستخدمين والمصانع</string>
+    <string name="admin_discrepancies_section">فروقات الجرد الدوري</string>
+    <string name="admin_no_discrepancies">لا توجد فروقات جرد مسجلة لهذا المصنع.</string>
+    <string name="admin_edit_user">تعديل الصلاحية</string>
+    <string name="admin_assigned_plants">المصانع المخصصة (مفصولة بفاصلة مثل P7, P8)</string>
+    <string name="admin_readonly_notice">صلاحية مدير النظام مطلوبة لتعديل صلاحيات المستخدمين أو إنشاء المصانع.</string>
+    <string name="admin_plants_section">المصانع المهيأة</string>
+
+    <!-- Feature 1: Image OCR Import -->
+    <string name="action_ocr_import">استيراد OCR</string>
+    <string name="ocr_screen_title">استيراد من صورة (OCR)</string>
+    <string name="ocr_take_photo">التقاط صورة</string>
+    <string name="ocr_pick_gallery">اختيار من المعرض</string>
+    <string name="ocr_processing">جارٍ تحليل الورقة عبر ML Kit OCR…</string>
+    <string name="ocr_preview_title">جدول المعاينة القابل للتعديل (%1$d صف)</string>
+    <string name="ocr_low_conf_legend">الحقول المظللة بالأصفر ذات ثقة منخفضة — راجعها قبل الحفظ.</string>
+    <string name="ocr_col_part">رقم القطعة (8)</string>
+    <string name="ocr_col_loc">الموقع</string>
+    <string name="ocr_col_line">الخط</string>
+    <string name="ocr_col_qty">الكمية المطلوبة</string>
+    <string name="ocr_add_row">إضافة صف</string>
+    <string name="ocr_confirm_save">تأكيد وحفظ في Firestore</string>
+    <string name="ocr_empty_hint">التقط صورة أو اخترها من المعرض لاستخراج أرقام القطع المكونة من 8 أرقام والمواقع وخطوط الإنتاج والكميات المطلوبة.</string>
+    <string name="ocr_no_rows_found">لم يتم اكتشاف أرقام قطع من 8 أرقام. جرّب صورة أوضح أو أضف صفاً يدوياً.</string>
+    <string name="ocr_show_raw_text">عرض النص المستخرج</string>
+    <string name="ocr_hide_raw_text">إخفاء النص المستخرج</string>
+
+    <!-- Feature 2: Fast Cycle Count -->
+    <string name="action_cycle_count">جرد سريع</string>
+    <string name="cc_screen_title">الجرد الدوري السريع</string>
+    <string name="cc_scan_cta">مسح الباركود</string>
+    <string name="cc_search_hint">أدخل رقم القطعة (8 أرقام) أو الاسم…</string>
+    <string name="cc_recent_counts">الأصناف المعدودة مؤخراً</string>
+    <string name="cc_no_recent_counts">لا توجد عمليات جرد دوري مسجلة لهذا المصنع بعد.</string>
+    <string name="cc_system_qty">رصيد النظام</string>
+    <string name="cc_actual_qty">الجرد الفعلي</string>
+    <string name="cc_variance_label">الفرق (الفعلي - النظام)</string>
+    <string name="cc_match_verified">تطابق تام — الفرق 0</string>
+    <string name="cc_save_instant">حفظ الجرد المطابق فوراً</string>
+    <string name="cc_submit_adjustment">إرسال تسوية الجرد الدوري</string>
+    <string name="cc_variance_warning">يوجد فرق! الإرسال سيحدّث رصيد النظام ويسجل فرق جرد.</string>
+    <string name="cc_adjustment_notes_hint">السبب / ملاحظة الممر (اختياري)</string>
+    <string name="cc_select_another">جرد صنف آخر</string>
+    <string name="cc_status_matched">مطابق</string>
+    <string name="cc_status_adjusted">تمت التسوية</string>
+    <string name="cc_item_not_found">القطعة %1$s غير موجودة في المصنع %2$s.</string>
+    <string name="cc_new_stock_preview">الرصيد الجديد: %1$d %2$s</string>
+
+    <!-- Feature 3: Light / Dark / System Theme -->
+    <string name="theme_section_title">مظهر التطبيق</string>
+    <string name="theme_dark">داكن</string>
+    <string name="theme_light">فاتح</string>
+    <string name="theme_system">النظام</string>
+    <string name="cd_theme_toggle">تبديل مظهر التطبيق</string>
+
+    <!-- Feature 4: Voice Command System -->
+    <string name="voice_cmd_fab">أمر صوتي</string>
+    <string name="voice_cmd_title">الأوامر الصوتية</string>
+    <string name="voice_cmd_subtitle">تحدث بالعربية أو الإنجليزية، راجع النص أو عدّله يدوياً، ثم اضغط تأكيد.</string>
+    <string name="voice_cmd_tap_to_speak">اضغط الميكروفون للتحدث</string>
+    <string name="voice_cmd_listening">جارٍ الاستماع… تحدث الآن</string>
+    <string name="voice_cmd_tap_to_stop">اضغط للإيقاف</string>
+    <string name="voice_cmd_input_label">نص الأمر الصوتي (اضغط للتعديل)</string>
+    <string name="voice_cmd_input_hint">مثال: اصرف 50 من 13009444</string>
+    <string name="voice_cmd_examples_title">أمثلة للأوامر (اضغط للتجربة)</string>
+    <string name="voice_cmd_ex_issue_en">Issue 50 pieces of 13009444</string>
+    <string name="voice_cmd_ex_return_en">Return 10 of 69241577</string>
+    <string name="voice_cmd_ex_issue_ar">اصرف 50 من 13009444</string>
+    <string name="voice_cmd_ex_return_ar">ريتيرن 10 من 69241577</string>
+    <string name="voice_cmd_ex_add_ar">زيادة 20 قطعة رقم 71054141</string>
+    <string name="voice_cmd_ex_count_en">جرد 25 من 13009444</string>
+    <string name="voice_cmd_confirm">تأكيد</string>
+    <string name="voice_cmd_cancel">إلغاء</string>
+    <string name="voice_cmd_dialog_title">تأكيد الأمر الصوتي</string>
+    <string name="voice_cmd_dialog_message_qty">هل تقصد: %1$s %2$d من رقم القطعة %3$s؟</string>
+    <string name="voice_cmd_dialog_message_open_cc">هل تقصد: فتح الجرد الدوري لرقم القطعة %1$s؟</string>
+    <string name="voice_cmd_yes_execute">نعم، تنفيذ</string>
+    <string name="voice_cmd_action_issue">صرف</string>
+    <string name="voice_cmd_action_receive">إرجاع / استلام</string>
+    <string name="voice_cmd_action_count">جرد دوري</string>
+    <string name="voice_cmd_mic_permission">مطلوب إذن الميكروفون لاستخدام الأوامر الصوتية.</string>
+    <string name="voice_cmd_use_system_mic">استخدام نافذة الصوت</string>
+    <string name="voice_cmd_err_empty">تحدث أو اكتب أمراً أولاً.</string>
+    <string name="voice_cmd_err_action">تعذر تحديد العملية (صرف، ريتيرن/زيادة، أو جرد).</string>
+    <string name="voice_cmd_err_part">يجب ذكر رقم قطعة مكون من 8 أرقام (مثل 13009444).</string>
+    <string name="voice_cmd_err_qty">يجب ذكر كمية صحيحة أكبر من صفر (مثل 50).</string>
+    <string name="voice_cmd_viewer_blocked">صلاحية المشاهد لا تسمح بتنفيذ حركات المخزون.</string>
+</resources>

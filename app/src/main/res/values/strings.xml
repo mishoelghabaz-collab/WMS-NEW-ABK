@@ -1,0 +1,250 @@
+<resources>
+    <string name="app_name">PlantWMS</string>
+
+    <!-- Navigation -->
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_inventory">Inventory</string>
+    <string name="nav_history">History</string>
+    <string name="nav_map">Map</string>
+    <string name="nav_admin">Admin</string>
+
+    <!-- Top Bar & Language -->
+    <string name="cd_plant_selector">Select Plant</string>
+    <string name="cd_language_toggle">Toggle Language</string>
+    <string name="cd_barcode_scanner">Open Barcode Scanner</string>
+    <string name="cd_sign_out">Sign Out</string>
+    <string name="lang_en">EN</string>
+    <string name="lang_ar">AR</string>
+    <string name="no_plant_assigned">No Plant</string>
+
+    <!-- Roles -->
+    <string name="role_admin">ADMIN</string>
+    <string name="role_supervisor">SUPERVISOR</string>
+    <string name="role_operator">OPERATOR</string>
+    <string name="role_viewer">VIEWER</string>
+
+    <!-- Material Statuses -->
+    <string name="status_in_stock">IN STOCK</string>
+    <string name="status_low_stock">LOW STOCK</string>
+    <string name="status_out_of_stock">OUT OF STOCK</string>
+
+    <!-- Transaction Types -->
+    <string name="tx_receive">RECEIVE</string>
+    <string name="tx_issue">ISSUE</string>
+    <string name="tx_transfer">TRANSFER</string>
+
+    <!-- Auth -->
+    <string name="auth_sign_in_google">Sign in with Google</string>
+    <string name="auth_sign_out">Sign Out</string>
+    <string name="auth_title">PlantWMS Industrial Inventory</string>
+    <string name="auth_subtitle">Sign in with your authorized plant Google account to access real-time warehouse operations.</string>
+    <string name="auth_badge">LIVE FIRESTORE SYNC</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_factory_selector_label">Active Plant</string>
+    <string name="dashboard_add_factory">New Plant</string>
+    <string name="dashboard_metrics_section">Real-Time Plant Telemetry</string>
+    <string name="metric_total_stock">Total Stock</string>
+    <string name="metric_total_stock_sub">Units On Hand</string>
+    <string name="metric_skus">SKUs</string>
+    <string name="metric_skus_sub">Unique Parts</string>
+    <string name="metric_critical_stock">Critical Stock</string>
+    <string name="metric_critical_stock_sub">Out of Stock</string>
+    <string name="metric_warning">Warning</string>
+    <string name="metric_warning_sub">Low Threshold</string>
+    <string name="dashboard_quick_actions">Quick Actions</string>
+    <string name="action_scan">Scan</string>
+    <string name="action_receive">Receive</string>
+    <string name="action_issue">Issue</string>
+    <string name="action_transfer">Transfer</string>
+    <string name="dashboard_recent_transactions">Recent Movements</string>
+    <string name="dashboard_no_plants_title">No Plants Configured</string>
+    <string name="dashboard_no_plants_desc">Create a plant in Firestore or ask an administrator to assign your factory access.</string>
+    <string name="dashboard_no_transactions">No stock movements recorded yet for this plant.</string>
+    <string name="dashboard_viewer_readonly">Read-only viewer role. Contact an admin to enable stock transactions.</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_create_plant_title">Create Manufacturing Plant</string>
+    <string name="dialog_plant_code">Plant Code (e.g. P7)</string>
+    <string name="dialog_plant_name">Plant Name</string>
+    <string name="dialog_plant_lines">Production Lines (comma-separated)</string>
+    <string name="dialog_plant_zones">Warehouse Zones (comma-separated)</string>
+    <string name="dialog_stock_tx_title">Atomic Stock Movement</string>
+    <string name="dialog_add_material_title">Register New Material SKU</string>
+    <string name="dialog_part_number">8-Digit Part Number</string>
+    <string name="dialog_material_name">Material Name</string>
+    <string name="dialog_quantity">Quantity</string>
+    <string name="dialog_location">Bin Location (e.g. A-01-02)</string>
+    <string name="dialog_target_location">Target Bin Location</string>
+    <string name="dialog_production_line">Production Line (e.g. Volvo LFT)</string>
+    <string name="dialog_min_threshold">Min Threshold</string>
+    <string name="dialog_notes">Notes (Optional)</string>
+    <string name="dialog_confirm">Confirm</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_new_sku_switch">Register New SKU Instead</string>
+    <string name="error_part_number_8_digits">Part number must be exactly 8 digits.</string>
+    <string name="error_positive_qty">Quantity must be greater than 0.</string>
+
+    <!-- Material List (Inventory) -->
+    <string name="filter_all">All</string>
+    <string name="inventory_search_hint">Search 8-digit part, name, or bin…</string>
+    <string name="inventory_btn_receive">+ Receive</string>
+    <string name="inventory_btn_issue">- Issue</string>
+    <string name="inventory_btn_transfer">Transfer</string>
+    <string name="inventory_add_sku">Add SKU</string>
+    <string name="inventory_empty_title">No Materials Found</string>
+    <string name="inventory_empty_desc">No matching SKUs in this plant/line. Adjust filters or register a new 8-digit material.</string>
+    <string name="inventory_current_qty">Current Available</string>
+    <string name="inventory_current_loc">Current Bin</string>
+    <string name="error_insufficient_stock">Cannot issue %1$d: only %2$d available.</string>
+    <string name="error_target_location_required">Target bin location is required for transfer.</string>
+
+    <!-- Materials Search, Sort, Voice, Scanner & Bulk Actions -->
+    <string name="materials_search_label">Search part number (8 digits) or name…</string>
+    <string name="cd_voice_search">Voice search part number</string>
+    <string name="cd_sort_filter">Sort and filter</string>
+    <string name="cd_clear_search">Clear search</string>
+    <string name="recent_scans_title">Recent Scans</string>
+    <string name="sort_sheet_title">Sort Materials</string>
+    <string name="sort_part_asc">Part Number A–Z</string>
+    <string name="sort_lowest_stock">Lowest Stock First</string>
+    <string name="sort_location_asc">Location (Aisle / Bin)</string>
+    <string name="empty_search_message">No material found for \"%1$s\". Try scanning the barcode or adding a new item.</string>
+    <string name="action_scan_barcode">Scan Barcode</string>
+    <string name="action_add_item">Add Item</string>
+    <string name="select_mode_enable">Select</string>
+    <string name="select_mode_done">Done</string>
+    <string name="selected_count_label">%1$d selected</string>
+    <string name="bulk_transfer">Bulk Transfer</string>
+    <string name="bulk_issue">Bulk Issue</string>
+    <string name="bulk_export_csv">Export CSV</string>
+    <string name="bulk_issue_qty_label">Quantity to issue per selected SKU</string>
+    <string name="bulk_transfer_title">Bulk Transfer (%1$d SKUs)</string>
+    <string name="bulk_issue_title">Bulk Issue (%1$d SKUs)</string>
+    <string name="voice_search_prompt">Speak 8-digit part number or material name</string>
+    <string name="voice_search_unavailable">Speech recognition is not available on this device.</string>
+    <string name="scanner_dialog_title">Scan Part Barcode</string>
+    <string name="scanner_camera_permission_rationale">Camera access is required to scan 8-digit material barcodes.</string>
+    <string name="scanner_grant_permission">Grant Camera Access</string>
+    <string name="scanner_manual_hint">Point camera at a barcode or QR label</string>
+    <string name="csv_export_subject">PlantWMS Inventory Export (%1$s)</string>
+
+    <!-- Scanner Screen -->
+    <string name="scanner_title">Continuous Barcode Scanner</string>
+    <string name="scanner_continuous_label">Continuous Scan</string>
+    <string name="scanner_paused_label">Paused</string>
+    <string name="scanner_manual_lookup">Manual 8-Digit Lookup</string>
+    <string name="scanner_lookup_button">Find</string>
+    <string name="scanner_last_scanned">Last Scanned</string>
+    <string name="scanner_not_found_in_plant">SKU %1$s not registered in %2$s.</string>
+    <string name="scanner_count_now">Cycle Count</string>
+
+    <!-- Transaction History Screen -->
+    <string name="history_title">Transaction History</string>
+    <string name="history_search_hint">Filter by 8-digit part or material…</string>
+    <string name="history_date_all">All Dates</string>
+    <string name="history_date_today">Today</string>
+    <string name="history_date_7d">7 Days</string>
+    <string name="history_date_30d">30 Days</string>
+    <string name="history_empty">No stock transactions match the selected filters.</string>
+    <string name="history_operator_label">Operator: %1$s</string>
+
+    <!-- Warehouse Map Screen -->
+    <string name="map_title">Warehouse Zone Map</string>
+    <string name="map_bins_count">%1$d Bins</string>
+    <string name="map_skus_count">%1$d SKUs</string>
+    <string name="map_units_count">%1$d Units</string>
+    <string name="map_empty">No bins or materials mapped for plant %1$s yet.</string>
+    <string name="map_zone_label">Zone %1$s</string>
+
+    <!-- Admin & Operations Screen -->
+    <string name="admin_title">Admin &amp; Operations</string>
+    <string name="admin_operations_tools">Warehouse Operations</string>
+    <string name="admin_users_section">User Roles &amp; Plant Access</string>
+    <string name="admin_discrepancies_section">Cycle Count Discrepancies</string>
+    <string name="admin_no_discrepancies">No inventory discrepancies recorded for this plant.</string>
+    <string name="admin_edit_user">Edit Access</string>
+    <string name="admin_assigned_plants">Assigned Plants (comma-separated, e.g. P7, P8)</string>
+    <string name="admin_readonly_notice">Admin role is required to modify user permissions or create plants.</string>
+    <string name="admin_plants_section">Configured Plants</string>
+
+    <!-- Feature 1: Image OCR Import -->
+    <string name="action_ocr_import">OCR Import</string>
+    <string name="ocr_screen_title">Import from Image (OCR)</string>
+    <string name="ocr_take_photo">Take Photo</string>
+    <string name="ocr_pick_gallery">Select from Gallery</string>
+    <string name="ocr_processing">Scanning sheet with ML Kit OCR…</string>
+    <string name="ocr_preview_title">Editable Preview Table (%1$d rows)</string>
+    <string name="ocr_low_conf_legend">Highlighted cells have low OCR confidence — review before saving.</string>
+    <string name="ocr_col_part">Part No (8d)</string>
+    <string name="ocr_col_loc">Location</string>
+    <string name="ocr_col_line">Line</string>
+    <string name="ocr_col_qty">Req Qty</string>
+    <string name="ocr_add_row">Add Row</string>
+    <string name="ocr_confirm_save">Confirm &amp; Save to Firestore</string>
+    <string name="ocr_empty_hint">Capture or pick a photo of a printed sheet or handwritten list to extract 8-digit part numbers, bins, lines, and required quantities.</string>
+    <string name="ocr_no_rows_found">No 8-digit part numbers detected. Try a clearer photo or add a row manually.</string>
+    <string name="ocr_show_raw_text">Show Raw OCR Text</string>
+    <string name="ocr_hide_raw_text">Hide Raw OCR Text</string>
+
+    <!-- Feature 2: Fast Cycle Count -->
+    <string name="action_cycle_count">Cycle Count</string>
+    <string name="cc_screen_title">Fast Cycle Count</string>
+    <string name="cc_scan_cta">Scan Barcode</string>
+    <string name="cc_search_hint">Enter 8-digit Part Number or Name…</string>
+    <string name="cc_recent_counts">Recently Counted Items</string>
+    <string name="cc_no_recent_counts">No cycle counts recorded yet for this plant.</string>
+    <string name="cc_system_qty">System Stock</string>
+    <string name="cc_actual_qty">Actual Physical</string>
+    <string name="cc_variance_label">Variance (Actual - System)</string>
+    <string name="cc_match_verified">Exact Match — 0 Variance</string>
+    <string name="cc_save_instant">Save Verified Count</string>
+    <string name="cc_submit_adjustment">Submit Cycle Count Adjustment</string>
+    <string name="cc_variance_warning">Variance detected! Submitting will update system stock and log a discrepancy.</string>
+    <string name="cc_adjustment_notes_hint">Reason / Aisle note (optional)</string>
+    <string name="cc_select_another">Count Another SKU</string>
+    <string name="cc_status_matched">MATCHED</string>
+    <string name="cc_status_adjusted">ADJUSTED</string>
+    <string name="cc_item_not_found">Part %1$s was not found in plant %2$s.</string>
+    <string name="cc_new_stock_preview">New Stock: %1$d %2$s</string>
+
+    <!-- Feature 3: Light / Dark / System Theme -->
+    <string name="theme_section_title">Appearance Theme</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_system">System</string>
+    <string name="cd_theme_toggle">Switch app theme</string>
+
+    <!-- Feature 4: Voice Command System -->
+    <string name="voice_cmd_fab">Voice Command</string>
+    <string name="voice_cmd_title">Voice Command</string>
+    <string name="voice_cmd_subtitle">Speak in English or Arabic, review/edit the command, then confirm.</string>
+    <string name="voice_cmd_tap_to_speak">Tap Microphone to Speak</string>
+    <string name="voice_cmd_listening">Listening… Speak now</string>
+    <string name="voice_cmd_tap_to_stop">Tap to Stop</string>
+    <string name="voice_cmd_input_label">Spoken Command (Tap to Edit)</string>
+    <string name="voice_cmd_input_hint">e.g. Issue 50 pieces of 13009444</string>
+    <string name="voice_cmd_examples_title">Example Commands (Tap to Try)</string>
+    <string name="voice_cmd_ex_issue_en">Issue 50 pieces of 13009444</string>
+    <string name="voice_cmd_ex_return_en">Return 10 of 69241577</string>
+    <string name="voice_cmd_ex_issue_ar">اصرف 50 من 13009444</string>
+    <string name="voice_cmd_ex_return_ar">ريتيرن 10 من 69241577</string>
+    <string name="voice_cmd_ex_add_ar">زيادة 20 قطعة رقم 71054141</string>
+    <string name="voice_cmd_ex_count_en">Count 25 of 13009444</string>
+    <string name="voice_cmd_confirm">Confirm</string>
+    <string name="voice_cmd_cancel">Cancel</string>
+    <string name="voice_cmd_dialog_title">Confirm Voice Command</string>
+    <string name="voice_cmd_dialog_message_qty">Did you mean: %1$s %2$d of Part Number %3$s?</string>
+    <string name="voice_cmd_dialog_message_open_cc">Did you mean: Open Cycle Count for Part Number %1$s?</string>
+    <string name="voice_cmd_yes_execute">Yes, Execute</string>
+    <string name="voice_cmd_action_issue">Issue</string>
+    <string name="voice_cmd_action_receive">Return / Receive</string>
+    <string name="voice_cmd_action_count">Cycle Count</string>
+    <string name="voice_cmd_mic_permission">Microphone permission is required for voice commands.</string>
+    <string name="voice_cmd_use_system_mic">Use System Speech Popup</string>
+    <string name="voice_cmd_err_empty">Speak or enter a command first.</string>
+    <string name="voice_cmd_err_action">Could not detect action (Issue, Return/Add, or Count).</string>
+    <string name="voice_cmd_err_part">Include an exact 8-digit Part Number (e.g. 13009444).</string>
+    <string name="voice_cmd_err_qty">Include a valid positive quantity (e.g. 50).</string>
+    <string name="voice_cmd_viewer_blocked">Viewer role cannot execute warehouse stock changes.</string>
+</resources>

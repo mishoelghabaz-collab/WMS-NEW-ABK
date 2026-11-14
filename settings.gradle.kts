@@ -25,3 +25,4 @@ dependencyResolutionManagement {
 rootProject.name = "PlantWMS"
 
 include(":app")
+project(":app").projectDir = file("android_apk/app")
